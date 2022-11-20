@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+<canvas width = "750" height="585" id="game">
+</canvas>
+<style>
+    body{
+        height:100%;
+        margin: 0;
+        align-items: center;
+        justify-content: center;
+        display: flex;
+        background:black;
+    }
+</style>
+<script>
+    const canvas = document.getElementById("game");
+    const context = canvas.getContext('2d');
+    const grid = 15;
+    const paddleHeight = grid*5;
+    const maxPaddleY = canvas.height - grid - (grid*5);
+    var paddleSpeed = 3;
+    var ballSpeed = 4;
+    var leftScore = 0;
+    var rightScore = 0;
+    const leftPaddle = {
+        x:grid*2,
+        y:canvas.height/2-paddleHeight/2,
+        height:paddleHeight,
+        width:grid,
+        dy:0
+
+    };
+    const rightPaddle = {
+        x:canvas.width - grid * 3,
+        y:canvas.height/2-paddleHeight/2,
+        height:paddleHeight,
+        width:grid,
+        dy:0
+
+    };
+    const Rocc = {
+        height:grid,
+        width:grid,
+        x:canvas.width/2,
+        y:canvas.height/2,
+        dx:ballSpeed,
+        dy:ballSpeed,
+        resetting:false
+
+    };
+    function collides(obj1, obj2) {
+        return (obj1.x < obj2.x + obj2.width) && (obj1.x + obj1.width > obj2.x) && (obj1.y < obj2.y + obj2.height) && (obj1.y + obj1.height > obj2.y);
+    }
+    function speedUp(ball) {
+        if (ball.dx >= 0){
+            ball.dx += 0.25;
+        }
+        else{
+            ball.dx -= 0.25;
+        }
+        if (ball.dy >= 0){
+            ball.dy += 0.25;
+        }
+        else{
+            ball.dy -= 0.25;
+        }
+    }
+    function reset(ball) {
+        if (ball.dx >= 0){
+            ball.dx = 2;
+        }
+        else{
+            ball.dx = -2;
+        }
+        if (ball.dy >= 0){
+            ball.dy = 2;
+        }
+        else{
+            ball.dy = 2;
+        }
+    }
+    function loop(){
+        requestAnimationFrame(loop);
+        context.clearRect(0,0,
+            canvas.width, canvas.height);
+        leftPaddle.y += leftPaddle.dy;
+        rightPaddle.y += rightPaddle.dy;
+
+
+        if(leftPaddle.y < grid){
+            leftPaddle.y = grid;
+        }
+        else if (leftPaddle.y > maxPaddleY){
+            leftPaddle.y = maxPaddleY;
+        }
+        if(rightPaddle.y < grid){
+            rightPaddle.y = grid;
+        }
+        else if(rightPaddle.y > maxPaddleY) {
+            rightPaddle.y = maxPaddleY;
+        }
+        context.fillStyle="white";
+        context.fillRect(leftPaddle.x, leftPaddle.y, leftPaddle.width, leftPaddle.height);
+        context.fillRect(rightPaddle.x, rightPaddle.y, rightPaddle.width, rightPaddle.height);
+        Rocc.x += Rocc.dx;
+        Rocc.y += Rocc.dy;
+        if(collides(Rocc, leftPaddle)){
+            Rocc.dx *= -1;
+            Rocc.x = leftPaddle.x + leftPaddle.width;
+            speedUp(Rocc);
+        }
+        if(collides(Rocc, rightPaddle)){
+            Rocc.dx *= -1;
+            Rocc.x = rightPaddle.x - rightPaddle.width;
+            speedUp(Rocc);
+        }
+        if(Rocc.y < grid){
+            Rocc.dy *= -1
+            Rocc.y= grid;
+        }
+        if(Rocc.y + grid > canvas.height - grid) {
+            Rocc.dy *= -1;
+            Rocc.y=canvas.height - grid *
+                2;
+        }
+        if(Rocc.x < 0 && !Rocc.resetting) {
+            rightScore++;
+            Rocc.resetting = true;
+            reset(Rocc);
+            setTimeout(() => {
+                Rocc.resetting = false;
+                Rocc.x = canvas.width/2;
+                Rocc.y = canvas.height/2;
+
+            }, 400)
+        }
+        if(Rocc.x > canvas.width && !Rocc.resetting) {
+            leftScore++;
+            Rocc.resetting = true;
+            reset(Rocc);
+            setTimeout(() => {
+                Rocc.resetting = false;
+                Rocc.x = canvas.width/2;
+                Rocc.y = canvas.height/2;
+            }, 400)
+        }
+        context.fillRect(Rocc.x, Rocc.y, Rocc.width, Rocc.height);
+        context.fillStyle = "gray";
+        context.fillRect(0,0, canvas.width,grid);
+        context.fillRect(0, canvas.height-grid, canvas.width, canvas.height);
+        for (let i = grid; i < canvas.height-grid;i+=grid*2) {
+            context.fillRect(canvas.width/2, i, grid, grid)
+        }
+        context.font = "50px serif";
+        context.fillText(leftScore, canvas.width/2-75,60)
+        context.fillText(rightScore, canvas.width/2+50,60)
+
+    }
+    document.addEventListener("keydown", function(event){
+        if(event.which === 87){
+            leftPaddle.dy = -paddleSpeed;
+        }
+        else if(event.which === 83){
+            leftPaddle.dy = paddleSpeed;
+        }
+        if(event.which === 38){
+            rightPaddle.dy = -paddleSpeed;
+        }
+        else if(event.which === 40){
+            rightPaddle.dy = paddleSpeed;
+        }
+    });
+    document.addEventListener("keyup", function(event){
+        if(event.which === 87){
+            leftPaddle.dy = 0;
+        }
+        else if(event.which === 83){
+            leftPaddle.dy = 0;
+        }
+        if(event.which === 38){
+            rightPaddle.dy = 0;
+        }
+        else if(event.which === 40){
+            rightPaddle.dy = 0;
+        }
+
+    });
+    requestAnimationFrame(loop);
+</script>
+</body>
+</html>

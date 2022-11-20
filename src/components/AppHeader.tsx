@@ -35,6 +35,9 @@ export default function ResponsiveAppBar() {
     const goToNewNote = () => {
         navigate('/new')
     }
+    const goToPong = () => {
+        window.location.href = "pong.html"
+    }
 
     return (
         <AppBar position="static">
@@ -53,6 +56,12 @@ export default function ResponsiveAppBar() {
                         >
                             Create note
                         </Button>
+                        {/*<Button*/}
+                        {/*    onClick={goToPong}*/}
+                        {/*    sx={{my: 2, color: 'white', display: 'block'}}*/}
+                        {/*>*/}
+                        {/*    PONG*/}
+                        {/*</Button>*/}
                     </Box>
 
                     <Box sx={{
